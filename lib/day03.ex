@@ -24,21 +24,27 @@ defmodule Advent2018.Day03 do
     do: Enum.reduce(squares, %{}, &populate_matrix/2)
 
   defp populate_matrix(square, matrix) do
-    keys = square_keys(square)
-
-    Enum.reduce keys, matrix, fn point, acc ->
+    square
+    |> square_keys()
+    |> Enum.reduce(matrix, fn point, acc ->
       Map.update(acc, point, 1, &(&1 + 1))
-    end
+    end)
   end
 
   defp find_no_overlapping(_, []), do: {:error, :no_match_found}
 
   defp find_no_overlapping(matrix, [one | rest]) do
     keys = square_keys(one)
-    if Enum.all?(keys, fn k -> Map.get(matrix, k) == 1 end) do
-      one
-    else
-      find_no_overlapping(matrix, rest)
+
+    result =
+      matrix
+      |> Map.take(keys)
+      |> Map.values()
+      |> Enum.uniq()
+
+    case result do
+      [1] -> one
+      _ -> find_no_overlapping(matrix, rest)
     end
   end
 
